@@ -1,35 +1,41 @@
-import { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import actions from './redux/phonebook/phonebook-actions';
 import { v4 as uuidv4 } from 'uuid';
 import ContactForm from './components/ContactForm/ContactForm';
 import Filter from './components/Filter/Filter';
 import ContactList from './components/ContactList/ContactList';
 
-export default function App() {
-  const [contacts, setContacts] = useState([]);
-  const [filter, setFilter] = useState('');
+function App({
+  contacts,
+  inputValue,
+  addToContact,
+  deleteContact,
+  filterContact,
+}) {
+  // const [contacts, setContacts] = useState([]);
+  // const [filter, setFilter] = useState('');
 
-  useEffect(() => {
-    const localState = JSON.parse(localStorage.getItem('Contacts'));
-    if (localState) {
-      setContacts(localState);
-    } else {
-      return;
-    }
-  }, []);
+  // useEffect(() => {
+  //   const localState = JSON.parse(localStorage.getItem('Contacts'));
+  //   if (localState) {
+  //     setContacts(localState);
+  //   } else {
+  //     return;
+  //   }
+  // }, []);
 
-  useEffect(() => {
-    localStorage.setItem('Contacts', JSON.stringify(contacts));
-  }, [contacts]);
+  // useEffect(() => {
+  //   localStorage.setItem('Contacts', JSON.stringify(contacts));
+  // }, [contacts]);
 
-  const deleteContact = contactId => {
-    setContacts(contacts =>
-      contacts.filter(contact => contact.id !== contactId),
-    );
-  };
+  // const deleteContact = contactId => {
+  //   setContacts(contacts =>
+  //     contacts.filter(contact => contact.id !== contactId),
+  //   );
+  // };
 
-  const addToContact = data => {
+  const submit = data => {
     const newContact = { ...data, id: uuidv4() };
-
     if (
       contacts.find(
         contact => contact.name.toLowerCase() === data.name.toLowerCase(),
@@ -37,30 +43,42 @@ export default function App() {
     ) {
       alert(`${data.name} is already in contacts`);
     } else {
-      setContacts(contacts => [...contacts, newContact]);
+      addToContact(newContact);
     }
   };
 
-  const filterContact = e => {
-    const { value } = e.currentTarget;
-    setFilter(value);
-  };
+  // const filterContact = e => {
+  //   const { value } = e.currentTarget;
+  //   setFilter(value);
+  // };
 
   const getVisibleContacts = () => {
     return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(filter.toLowerCase()),
+      contact.name.toLowerCase().includes(inputValue.toLowerCase()),
     );
   };
-
-  const getContacts = getVisibleContacts();
 
   return (
     <div className="phonebook">
       <h1>Phonebook</h1>
-      <ContactForm onSubmit={addToContact} />
+      <ContactForm onSubmit={submit} />
       <h2>Contacts</h2>
-      <Filter filter={filter} filterContact={filterContact} />
-      <ContactList contacts={getContacts} onDeleteContact={deleteContact} />
+      <Filter filter={inputValue} filterContact={filterContact} />
+      <ContactList
+        contacts={getVisibleContacts()}
+        onDeleteContact={deleteContact}
+      />
     </div>
   );
 }
+const mapStateToProps = state => ({
+  contacts: state.contact,
+  inputValue: state.inputValue,
+});
+const mapDispatchToProps = dispatch => ({
+  addToContact: value => dispatch(actions.addToContact(value)),
+  deleteContact: id => dispatch(actions.deleteContact(id)),
+  filterContact: event =>
+    dispatch(actions.filterContact(event.currentTarget.value)),
+});
+export default connect(mapStateToProps, mapDispatchToProps)(App);

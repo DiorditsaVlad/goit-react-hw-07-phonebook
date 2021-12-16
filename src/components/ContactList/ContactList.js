@@ -1,5 +1,4 @@
 import PropTypes from 'prop-types';
-
 const ContactList = ({ contacts, onDeleteContact }) => {
   return (
     <ul className="contact_list">
