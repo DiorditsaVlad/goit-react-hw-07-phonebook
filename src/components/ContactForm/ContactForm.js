@@ -1,8 +1,24 @@
 import { useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { connect } from 'react-redux';
+import actions from '../../redux/phonebook/phonebook-actions';
 
-export default function ContactForm({ onSubmit }) {
+function ContactForm({ contacts, addToContact }) {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
+
+  const submit = data => {
+    const newContact = { ...data, id: uuidv4() };
+    if (
+      contacts.find(
+        contact => contact.name.toLowerCase() === data.name.toLowerCase(),
+      )
+    ) {
+      alert(`${data.name} is already in contacts`);
+    } else {
+      addToContact(newContact);
+    }
+  };
 
   const handleInputChange = e => {
     const { name, value } = e.currentTarget;
@@ -20,7 +36,7 @@ export default function ContactForm({ onSubmit }) {
 
   const handleSubmit = e => {
     e.preventDefault();
-    onSubmit({ name: name, number: number });
+    submit({ name: name, number: number });
     reset();
   };
 
@@ -59,3 +75,11 @@ export default function ContactForm({ onSubmit }) {
     </div>
   );
 }
+const mapStateToProps = state => ({
+  contacts: state.contact,
+});
+const mapDispatchToProps = dispatch => ({
+  addToContact: value => dispatch(actions.addToContact(value)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactForm);

@@ -1,5 +1,8 @@
 import PropTypes from 'prop-types';
-const ContactList = ({ contacts, onDeleteContact }) => {
+import { connect } from 'react-redux';
+import getVisibleContacts from './helpers';
+import actions from '../../redux/phonebook/phonebook-actions';
+const ContactList = ({ contacts, deleteContact }) => {
   return (
     <ul className="contact_list">
       {contacts.map(({ id, name, number }) => (
@@ -7,7 +10,7 @@ const ContactList = ({ contacts, onDeleteContact }) => {
           <p className="contact_name">
             {name}: {number}
           </p>
-          <button className="contact_btn" onClick={() => onDeleteContact(id)}>
+          <button className="contact_btn" onClick={() => deleteContact(id)}>
             Delete
           </button>
         </li>
@@ -16,7 +19,6 @@ const ContactList = ({ contacts, onDeleteContact }) => {
   );
 };
 
-export default ContactList;
 ContactList.propTypes = {
   contacts: PropTypes.arrayOf(
     PropTypes.shape({
@@ -27,3 +29,13 @@ ContactList.propTypes = {
   ),
   onClick: PropTypes.func,
 };
+
+const mapStateToProps = state => ({
+  contacts: getVisibleContacts(state.contact, state.inputValue),
+});
+
+const mapDispatchToProps = dispatch => ({
+  deleteContact: id => dispatch(actions.deleteContact(id)),
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
