@@ -1,7 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import {
-  persistStore,
-  persistReducer,
+  // persistStore,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -9,15 +8,11 @@ import {
   PURGE,
   REGISTER,
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-import logger from 'redux-logger';
-import phonebookReducer from './phonebook/phonebook-reducer';
 
-const persistConfig = {
-  key: 'root',
-  storage,
-  blacklist: ['inputValue'],
-};
+import logger from 'redux-logger';
+
+import contactsReducer from './phonebook/phonebook-reducer';
+
 const middleware = getDefaultMiddleware =>
   getDefaultMiddleware({
     serializableCheck: {
@@ -26,13 +21,13 @@ const middleware = getDefaultMiddleware =>
   }).concat(logger);
 
 const store = configureStore({
-  reducer: persistReducer(persistConfig, phonebookReducer),
+  reducer: {
+    contacts: contactsReducer,
+  },
   middleware,
   devTools: process.env.NODE_ENV === 'development',
 });
 
-const persistor = persistStore(store);
+// const persistor = persistStore(store);
 
-const storeExport = { store, persistor };
-
-export default storeExport;
+export { store };

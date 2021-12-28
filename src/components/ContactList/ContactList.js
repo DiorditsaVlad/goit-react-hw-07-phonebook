@@ -1,8 +1,17 @@
 import PropTypes from 'prop-types';
+import { useEffect } from 'react';
 import { connect } from 'react-redux';
-import getVisibleContacts from './helpers';
-import actions from '../../redux/phonebook/phonebook-actions';
-const ContactList = ({ contacts, deleteContact }) => {
+import {
+  deleteContact,
+  fetchContacts,
+} from '../../redux/phonebook/phonebook-operations';
+import { getVisibleContacts } from '../../redux/phonebook/phonebook-selectors';
+
+const ContactList = ({ contacts, handleClick, fetchContacts }) => {
+  useEffect(() => {
+    fetchContacts();
+  }, [fetchContacts]);
+
   return (
     <ul className="contact_list">
       {contacts.map(({ id, name, number }) => (
@@ -10,7 +19,11 @@ const ContactList = ({ contacts, deleteContact }) => {
           <p className="contact_name">
             {name}: {number}
           </p>
-          <button className="contact_btn" onClick={() => deleteContact(id)}>
+          <button
+            className="contact_btn"
+            type="button"
+            onClick={() => handleClick(id)}
+          >
             Delete
           </button>
         </li>
@@ -19,23 +32,19 @@ const ContactList = ({ contacts, deleteContact }) => {
   );
 };
 
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    }),
-  ),
-  onClick: PropTypes.func,
-};
-
 const mapStateToProps = state => ({
-  contacts: getVisibleContacts(state.contact, state.inputValue),
+  contacts: getVisibleContacts(state),
 });
 
 const mapDispatchToProps = dispatch => ({
-  deleteContact: id => dispatch(actions.deleteContact(id)),
+  handleClick: id => dispatch(deleteContact(id)),
+  fetchContacts: () => dispatch(fetchContacts()),
 });
+
+ContactList.propTypes = {
+  contacts: PropTypes.arrayOf(PropTypes.objectOf(PropTypes.string.isRequired)),
+  handleClick: PropTypes.func.isRequired,
+  fetchContacts: PropTypes.func,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(ContactList);
