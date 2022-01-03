@@ -1,12 +1,16 @@
 import { useState } from 'react';
-import { connect } from 'react-redux';
-import PropTypes from 'prop-types';
+import { useSelector, useDispatch } from 'react-redux';
+import { getAllContacts } from '../../redux/phonebook/phonebook-selectors';
 import { addContact } from '../../redux/phonebook/phonebook-operations';
 
-function ContactForm({ onSubmit }) {
+function ContactForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
+  ///////////////////
+  const contacts = useSelector(getAllContacts);
+  const dispatch = useDispatch();
+  ///////////////////
   const handleChange = e => {
     const { name, value } = e.currentTarget;
 
@@ -17,9 +21,17 @@ function ContactForm({ onSubmit }) {
     }
   };
 
-  const onFormSubmit = e => {
+  const handleOnSubmit = e => {
     e.preventDefault();
-    onSubmit({ name, number });
+    const nameInContact = name.toLowerCase().trim();
+    const isInContact = contacts.find(
+      cont => cont.name.toLowerCase().trim() === nameInContact,
+    );
+    if (isInContact) {
+      alert(`${name} is already in contact`);
+      return;
+    }
+    dispatch(addContact({ name, number }));
     reset();
   };
 
@@ -30,7 +42,7 @@ function ContactForm({ onSubmit }) {
 
   return (
     <div className="inner_form">
-      <form className="form" onSubmit={onFormSubmit}>
+      <form className="form" onSubmit={handleOnSubmit}>
         <label htmlFor="name">Name</label>
         <input
           type="text"
@@ -61,12 +73,4 @@ function ContactForm({ onSubmit }) {
   );
 }
 
-const mapDispatchToProps = dispatch => ({
-  onSubmit: data => dispatch(addContact(data)),
-});
-
-ContactForm.propTypes = {
-  onSubmit: PropTypes.func.isRequired,
-};
-
-export default connect(null, mapDispatchToProps)(ContactForm);
+export default ContactForm;

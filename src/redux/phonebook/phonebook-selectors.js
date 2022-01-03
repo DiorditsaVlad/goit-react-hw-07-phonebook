@@ -15,4 +15,4 @@ const getVisibleContacts = createSelector(
   },
 );
 
-export { getFilter, getVisibleContacts };
+export { getAllContacts, getFilter, getVisibleContacts };
